@@ -109,34 +109,55 @@ def create_task(payload: TaskCreate):
 
     return dict(row)
 
-# ---------- Stage 4: Update & Delete ----------
 @app.put("/tasks/{task_id}", summary="Update a task")
 def update_task(task_id: int, payload: TaskUpdate):
-    task = find_task(task_id)
-    if task is None:
+    conn = get_db()
+    cursor = conn.cursor()
+    cursor.execute("SELECT * FROM tasks WHERE id = ?", (task_id,))
+    row = cursor.fetchone()
+
+    if row is None:
+        conn.close()
         raise HTTPException(status_code=404, detail=f"Task {task_id} not found")
 
     if payload.title is None and payload.done is None:
+        conn.close()
         raise HTTPException(status_code=400, detail="Provide at least one of: title, done")
     if payload.title is not None and not payload.title.strip():
+        conn.close()
         raise HTTPException(status_code=400, detail="title cannot be empty")
 
-    if payload.title is not None:
-        task["title"] = payload.title.strip()
-    if payload.done is not None:
-        task["done"] = payload.done
-    return task
+    new_title = payload.title.strip() if payload.title is not None else row["title"]
+    new_done = int(payload.done) if payload.done is not None else row["done"]
+
+    cursor.execute(
+        "UPDATE tasks SET title = ?, done = ? WHERE id = ?",
+        (new_title, new_done, task_id)
+    )
+    conn.commit()
+
+    cursor.execute("SELECT * FROM tasks WHERE id = ?", (task_id,))
+    updated_row = cursor.fetchone()
+    conn.close()
+
+    return dict(updated_row)
 
 
 @app.delete("/tasks/{task_id}", status_code=204, summary="Delete a task")
 def delete_task(task_id: int):
-    task = find_task(task_id)
-    if task is None:
+    conn = get_db()
+    cursor = conn.cursor()
+    cursor.execute("SELECT * FROM tasks WHERE id = ?", (task_id,))
+    row = cursor.fetchone()
+
+    if row is None:
+        conn.close()
         raise HTTPException(status_code=404, detail=f"Task {task_id} not found")
-    tasks.remove(task)
+
+    cursor.execute("DELETE FROM tasks WHERE id = ?", (task_id,))
+    conn.commit()
+    conn.close()
     return None
-
-
 # ---------- Extras ----------
 @app.get("/stats", summary="Task counts")
 def stats():
