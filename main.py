@@ -89,18 +89,25 @@ def get_task(task_id: int):
         raise HTTPException(status_code=404, detail=f"Task {task_id} not found")
     return dict(row)
 
-# ---------- Stage 3: Create ----------
 @app.post("/tasks", status_code=201, summary="Create a task")
 def create_task(payload: TaskCreate):
-    global next_id
     if not payload.title or not payload.title.strip():
         raise HTTPException(status_code=400, detail="title is required and cannot be empty")
 
-    task = {"id": next_id, "title": payload.title.strip(), "done": False}
-    tasks.append(task)
-    next_id += 1
-    return task
+    conn = get_db()
+    cursor = conn.cursor()
+    cursor.execute(
+        "INSERT INTO tasks (title, done) VALUES (?, ?)",
+        (payload.title.strip(), 0)
+    )
+    conn.commit()
+    new_id = cursor.lastrowid
 
+    cursor.execute("SELECT * FROM tasks WHERE id = ?", (new_id,))
+    row = cursor.fetchone()
+    conn.close()
+
+    return dict(row)
 
 # ---------- Stage 4: Update & Delete ----------
 @app.put("/tasks/{task_id}", summary="Update a task")
