@@ -158,20 +158,27 @@ def delete_task(task_id: int):
     conn.commit()
     conn.close()
     return None
-# ---------- Extras ----------
 @app.get("/stats", summary="Task counts")
 def stats():
-    done_count = sum(1 for t in tasks if t["done"])
-    return {"total": len(tasks), "done": done_count, "open": len(tasks) - done_count}
+    conn = get_db()
+    cursor = conn.cursor()
+    cursor.execute("SELECT COUNT(*) FROM tasks")
+    total = cursor.fetchone()[0]
+    cursor.execute("SELECT COUNT(*) FROM tasks WHERE done = 1")
+    done_count = cursor.fetchone()[0]
+    conn.close()
+    return {"total": total, "done": done_count, "open": total - done_count}
 
 
 @app.post("/reset", summary="Reset to the 3 example tasks")
 def reset():
-    global tasks, next_id
-    tasks = [
-        {"id": 1, "title": "Buy milk", "done": False},
-        {"id": 2, "title": "Write README", "done": False},
-        {"id": 3, "title": "Push to GitHub", "done": True},
-    ]
-    next_id = 4
+    conn = get_db()
+    cursor = conn.cursor()
+    cursor.execute("DELETE FROM tasks")
+    cursor.executemany(
+        "INSERT INTO tasks (title, done) VALUES (?, ?)",
+        [("Buy milk", 0), ("Write README", 0), ("Push to GitHub", 1)]
+    )
+    conn.commit()
+    conn.close()
     return {"status": "reset"}
