@@ -65,3 +65,17 @@ This returned the one completed task ("Push to GitHub") — and after writing th
 ## The mortality experiment
 
 In Assignment 1, restarting the server reset all tasks back to the original 3 seed tasks — anything created, updated, or deleted during a session was lost, because the data lived only in memory (a Python list), not on disk. Now that tasks are stored in SQLite, that problem is gone: restarting the server no longer erases anything, because the data lives in `tasks.db` on disk instead of in a variable that disappears when the process stops.
+# Task API (Containerized Postgres)
+
+A small CRUD API for managing a to-do list, built with FastAPI. Tasks are stored in a real PostgreSQL database running inside Docker. The app and the database are fully containerized and start together with a single command.
+
+## Architecture (A3 Refactor)
+In this assignment, I swapped the previous SQLite storage for a containerized Postgres database. 
+As per the architecture requirements, **the routes and service layer remained unchanged**. I extracted the database logic out of `main.py` into a dedicated `repository.py`, and moved the connection logic into `db.py`. Only these two files and the infrastructure files (`Dockerfile`, `docker-compose.yml`, `.env`) were added.
+
+## How to run it (One Command)
+
+1. Make sure Docker Desktop is running.
+2. Copy `.env.example` to `.env`:
+   ```bash
+   cp .env.example .env
