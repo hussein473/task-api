@@ -79,3 +79,17 @@ As per the architecture requirements, **the routes and service layer remained un
 2. Copy `.env.example` to `.env`:
    ```bash
    cp .env.example .env
+
+
+
+
+   # Task API (A4 - Auth & Protect)
+
+**Latest Update:** Added Supabase Authentication. Users can sign up, log in, and receive a JWT. Protected routes require a valid Bearer token, verified securely via Supabase middleware.
+
+## How to test the Auth flow
+1. Start the server: `python -m uvicorn main:app --reload`
+2. Go to `http://localhost:8000/docs`.
+3. Use `POST /auth/signup` and `POST /auth/login`.
+4. Copy the `access_token` from the login response.
+5. Click the **Authorize** padlock at the top of Swagger, paste the token, and test `GET /protected/profile`.
