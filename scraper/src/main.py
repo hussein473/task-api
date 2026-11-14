@@ -1,6 +1,8 @@
-from .fetch import fetch_page
+from .discover import discover_books
 
 if __name__ == "__main__":
-    html = fetch_page("https://books.toscrape.com/catalogue/page-1.html", "catalogue-page-1.html")
-    print("ok" if html else "failed")
-    raise SystemExit(0 if html else 1)
+    pages, found, unique = discover_books()
+    print(f"catalogue_pages={pages}")
+    print(f"discovered={len(found)}")
+    print(f"unique_urls={len(unique)}")
+    raise SystemExit(0 if (pages == 3 and len(unique) == 60) else 1)
