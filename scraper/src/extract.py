@@ -4,7 +4,7 @@ from urllib.parse import urlparse
 
 from bs4 import BeautifulSoup
 
-from .fetch import CACHE_DIR, fetch_page
+from .fetch import CACHE_DIR, FAILURES, fetch_page
 
 RATINGS = ["One", "Two", "Three", "Four", "Five"]
 
@@ -47,6 +47,7 @@ def extract_book(url, source_page):
             if paragraph:
                 description = _clean(paragraph.get_text()) or None
     except (AttributeError, TypeError, KeyError) as e:
+        FAILURES[url] = f"parse error: {e}"
         print(f"PARSE FAILED {url}: {e}")
         return None
 
