@@ -76,8 +76,8 @@ The book data is already in the HTML the server sends, so a headless browser wou
 
 ## Ethics note
 
-I use an official API when one exists. I never bypass logins, paywalls or blocks, and I only collect what I need. This scraper only touches a site that exists for scraping practice.
+Before I scrape a site, I check that it allows it. This one is a practice site made for scraping, so it's fine. If a site has an official API, I'd use that instead. I don't get around logins, paywalls or blocks, I only take the data I actually need, and I go slowly so I don't overload the server.
 
 ## Honest limitation
 
-The parser depends on the site's current HTML (for example `div.product_main` and `p.price_color`). If the site changes its layout, pages will fail to parse and end up in `errors.json` instead of `books.json`. It also covers only 60 of the site's 1000 books, and descriptions are stored exactly as the page shows them, including any odd text.
+My scraper only works as long as the site's HTML stays the same. It looks for specific parts of the page, like the title and the price. If the site changes its layout, those pages will fail and show up in `errors.json` instead of `books.json`. It also only collects 60 of the 1000 books, and the descriptions are saved exactly as they appear on the page, even when the text looks odd.
